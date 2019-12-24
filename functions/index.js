@@ -10,27 +10,28 @@ app.get('/posts', (req, res) => {
     admin
         .firestore()
         .collection('posts')
+        .orderBy('createdAt', 'desc')
         .get()
         .then(data => {
             let posts = [];
             data.forEach(doc => {
-                posts.push(doc.data());
+                posts.push({
+                    screamId: doc.id,
+                    body: doc.data().body,
+                    userHandle: doc.data().userHandle,
+                    createdAt: doc.data().createdAt
+                });
             });
             return res.json(posts);
-        })
+    })
     .catch(err => console.error(err));
 })
 
-
-exports.createPost = functions.https.onRequest((req, res) => {
-        if(req.method !== 'POST'){
-            return res.status(400).json({ error: "Method not allowed" })
-        }
-
+app.post('/post', (req, res) => {
         const newPost = {
             body: req.body.body,
             user: req.body.userHandle,
-            createdAt: admin.firestore.Timestamp.fromDate(new Date())
+            createdAt: new Date().toISOString()
         };
 
         admin
@@ -45,3 +46,5 @@ exports.createPost = functions.https.onRequest((req, res) => {
                 console.error(err);
             });
 });
+
+exports.api = functions.region('europe-west1').https.onRequest(app);
