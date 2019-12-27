@@ -20,6 +20,7 @@ module.exports = (req, res, next) => {
         .then(data => {
             //handle isn't in auth, need to get it from collection
             req.user.handle = data.docs[0].data().handle;
+            req.user.imageUrl = data.docs[0].data().imageUrl;
             return next();
         })
         .catch(err => {
