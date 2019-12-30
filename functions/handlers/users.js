@@ -65,6 +65,8 @@ exports.login = (req, res) => {
         password: req.body.password
     };
 
+    console.log(req);
+
     const { valid, errors } = validateLoginData(user);
 
     if(!valid) return res.status(400).json(errors)
