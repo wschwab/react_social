@@ -27,6 +27,16 @@ let db = {
             body: 'This is a comment, bro',
             createdAt: '2019-12-26T19:44:41.127Z'
         }
+    ],
+    notifications: [
+        {
+            recipient: 'user',
+            sender: 'num2',
+            read: 'true | false',
+            postId: 'Wd88sJyXJM5zTGCaDRbS',
+            type: 'like | comment',
+            createdAt: '2019-12-26T19:44:41.127Z'
+        }
     ]
 }
 
