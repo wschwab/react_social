@@ -32,10 +32,10 @@ exports.createNotificationOnLike = functions.region('europe-west1').firestore.do
     .onCreate(snapshot => {
         return db.doc(`/posts/${snapshot.data().postId}`).get()
         .then(doc => {
-            if(doc.exists){
+            if(doc.exists && doc.data().userHandle !== snapshot.data().userHandle){
                 return db.doc(`/notifications/${snapshot.id}`).set({
                     createdAt: new Date().toISOString(),
-                    recipient: doc.data().userHandle,
+                    recipient: doc.data().user,
                     sender: snapshot.data().userHandle,
                     type: 'like',
                     read: false,
@@ -57,14 +57,12 @@ exports.deleteNotificationOnUnlike = functions.region('europe-west1').firestore.
 
 exports.createNotificationOnComment = functions.region('europe-west1').firestore.document('comments/{id}')
     .onCreate(snapshot => {
-        console.log(db.doc);
         return db.doc(`/posts/${snapshot.data().postId}`).get()
         .then(doc => {
-            if(doc.exists){
-                console.log(doc);
+            if(doc.exists && doc.data().userHandle !== snapshot.data().userHandle){
                 return db.doc(`/notifications/${snapshot.id}`).set({
                     createdAt: new Date().toISOString(),
-                    recipient: doc.data().userHandle,
+                    recipient: doc.data().user,
                     sender: snapshot.data().userHandle,
                     type: 'comment',
                     read: false,
@@ -76,4 +74,46 @@ exports.createNotificationOnComment = functions.region('europe-west1').firestore
             console.error(err);
             return;
         });
+    });
+
+exports.onImageChange = functions.region('europe-west1').firestore.document('/users/{userId}')
+    .onUpdate(change => {
+        if(change.before.data().imageUrl !== change.after.data().imageUrl){
+            let batch = db.batch();
+            console.log()
+            return db.collection('posts').where('user', '==', change.before.data().handle).get()
+                .then(data => {
+                    data.forEach(doc => {
+                        const post = db.doc(`/posts/${doc.id}`);
+                        batch.update(post, { userImage: change.after.data().imageUrl });
+                    })
+                    return batch.commit();
+                })
+        } else return true;
+    })
+
+exports.onPostDelete = functions.region('europe-west1').firestore.document('/posts/{postId}')
+    .onDelete((snapshot, context) => {
+        const postId = context.params.postId;
+        const batch = db.batch();
+        return db.collection('comments').where('postId', '==', postId).get()
+            .then(data => {
+                data.forEach(doc => {
+                    batch.delete(db.doc(`/comments/${doc.id}`));
+                })
+                return db.collection('likes').where('postId', '==', postId).get();
+            })
+            .then(data => {
+                data.forEach(doc => {
+                    batch.delete(db.doc(`/likes/${doc.id}`));
+                })
+                return db.collection('notifications').where('postId', '==', postId).get();
+            })
+            .then(data => {
+                data.forEach(doc => {
+                    batch.delete(db.doc(`/notifications/${doc.id}`));
+                })
+                return batch.commit();
+            })
+            .catch(err => console.error(err));
     });
