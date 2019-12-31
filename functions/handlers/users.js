@@ -19,7 +19,7 @@ exports.signup = (req, res) => {
 
     if(!valid) return res.status(400).json(errors);
 
-    const defaultImg = 'deafultImg.png';
+    const defaultImg = 'defaultImg.png';
 
     let token, userId;
     db.doc(`/users/${newUser.handle}`).get()
@@ -103,7 +103,7 @@ exports.getUserPublicDetails = (req, res) => {
         .then(doc => {
             if(doc.exists){
                 userData.user = doc.data();
-                return db.collection('posts').where('userHandle', '==', req.params.handle)
+                return db.collection('posts').where('user', '==', req.params.handle)
                     .orderBy('createdAt', 'desc').get();
             } else {
                 return res.status(404).json({ error: 'User not found' })
@@ -115,7 +115,7 @@ exports.getUserPublicDetails = (req, res) => {
                 userData.posts.push({
                     body: doc.data().body,
                     createdAt: doc.data().createdAt,
-                    userHandle: doc.data().userHandle,
+                    user: doc.data().user,
                     userImage: doc.data().userImage,
                     likeCount: doc.data().likeCount,
                     commentCount: doc.data().commentCount,
@@ -136,7 +136,7 @@ exports.getAuthenticatedUser = (req, res) => {
         .then(doc => {
             if(doc.exists){
                 userData.credentials = doc.data();
-                return db.collection('likes').where('userHandle', '==', req.user.handle).get()
+                return db.collection('likes').where('user', '==', req.user.handle).get()
             }
         })
         .then(data => {
@@ -180,7 +180,7 @@ exports.uploadImage = (req, res) => {
     let imageToBeUploaded = {};
 
     busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-        if(mimtype !== 'image/jpeg' && mimetype !== 'image/png') {
+        if(mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
             return res.status(400).json({ error: 'only jpeg and png images supported' });
         }
 

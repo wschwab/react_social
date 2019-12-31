@@ -32,11 +32,11 @@ exports.createNotificationOnLike = functions.region('europe-west1').firestore.do
     .onCreate(snapshot => {
         return db.doc(`/posts/${snapshot.data().postId}`).get()
         .then(doc => {
-            if(doc.exists && doc.data().userHandle !== snapshot.data().userHandle){
+            if(doc.exists && doc.data().user !== snapshot.data().user){
                 return db.doc(`/notifications/${snapshot.id}`).set({
                     createdAt: new Date().toISOString(),
                     recipient: doc.data().user,
-                    sender: snapshot.data().userHandle,
+                    sender: snapshot.data().user,
                     type: 'like',
                     read: false,
                     postId: doc.id
@@ -59,11 +59,11 @@ exports.createNotificationOnComment = functions.region('europe-west1').firestore
     .onCreate(snapshot => {
         return db.doc(`/posts/${snapshot.data().postId}`).get()
         .then(doc => {
-            if(doc.exists && doc.data().userHandle !== snapshot.data().userHandle){
+            if(doc.exists && doc.data().user !== snapshot.data().user){
                 return db.doc(`/notifications/${snapshot.id}`).set({
                     createdAt: new Date().toISOString(),
                     recipient: doc.data().user,
-                    sender: snapshot.data().userHandle,
+                    sender: snapshot.data().user,
                     type: 'comment',
                     read: false,
                     postId: doc.id

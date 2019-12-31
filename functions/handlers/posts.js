@@ -11,7 +11,7 @@ exports.getAllPosts = (req, res) => {
                 posts.push({
                     screamId: doc.id,
                     body: doc.data().body,
-                    userHandle: doc.data().userHandle,
+                    user: doc.data().user,
                     createdAt: doc.data().createdAt,
                     commentCount: doc.data().commentCount,
                     likeCount: doc.data().likeCount,
@@ -33,7 +33,7 @@ exports.postOne = (req, res) => {
 
     const newPost = {
         body: req.body.body,
-        userHandle: req.user.handle,
+        user: req.user.handle,
         userImage: req.user.imageUrl,
         createdAt: new Date().toISOString(),
         likeCount: 0,
@@ -85,7 +85,7 @@ exports.comment = (req, res) => {
         body: req.body.body,
         createdAt: new Date().toISOString(),
         postId: req.params.postId,
-        userHandle: req.user.handle,
+        user: req.user.handle,
         userImage: req.user.imageUrl
     };
 
@@ -109,7 +109,7 @@ exports.comment = (req, res) => {
 }
 
 exports.like = (req, res) => {
-    const likeDoc = db.collection('likes').where('userHandle', '==', req.user.handle)
+    const likeDoc = db.collection('likes').where('user', '==', req.user.handle)
         .where('postId', '==', req.params.postId)
         .limit(1);
 
@@ -130,7 +130,7 @@ exports.like = (req, res) => {
             if(data.empty){
                 return db.collection('likes').add({
                     postId: req.params.postId,
-                    userHandle: req.user.handle
+                    user: req.user.handle
                 })
                 // since non-empty could pass through, nest then()
                 .then(() => {
@@ -151,7 +151,7 @@ exports.like = (req, res) => {
 };
 
 exports.unlike = (req, res) => {
-    const likeDoc = db.collection('likes').where('userHandle', '==', req.user.handle)
+    const likeDoc = db.collection('likes').where('user', '==', req.user.handle)
         .where('postId', '==', req.params.postId)
         .limit(1);
 
@@ -195,7 +195,7 @@ exports.deletePost = (req, res) => {
             if(!doc.exists){
                 return res.status(404).json({ error: 'Post not found' });
             }
-            if(doc.data().userHandle !== req.user.handle){
+            if(doc.data().user !== req.user.handle){
                 res.status(403).json({ error: 'Unauthorized'});
             } else {
                 return document.delete();
