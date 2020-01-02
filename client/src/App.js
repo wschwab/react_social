@@ -8,8 +8,8 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Navbar from './components/Navbar'
 
 // Pages
-import home from './pages/home';
-import login from './pages/login';
+import Home from './pages/home';
+import Login from './pages/login';
 import signup from './pages/signup';
 
 const theme = createMuiTheme({
@@ -40,8 +40,8 @@ function App() {
             <Navbar/>
             <div className="container">
                 <Switch>
-                    <Route exact path="/" component={home}/>
-                    <Route exact path="/login" component={login}/>
+                    <Route exact path="/" component={Home}/>
+                    <Route exact path="/login" component={Login}/>
                     <Route exact path="/signup" component={signup}/>
                 </Switch>
             </div>
