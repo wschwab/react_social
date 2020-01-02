@@ -28,7 +28,7 @@ const styles = {
     }
 }
 
-const Login = props => {
+const Login = ({ classes, history }) => {
     const [state, setState] = useState({
         email: '',
         password: '',
@@ -36,17 +36,14 @@ const Login = props => {
         errors: {}
     })
 
-    const { classes } = props
-
     const handleChange = event => {
-        setState({
-                [event.target.name]: event.target.value
-        })
+        setState({...state, [event.target.name]: event.target.value})
     }
 
     const handleSubmit = event =>  {
         event.preventDefault()
         setState({
+            ...state,
             loading: true
         })
         const userData = {
@@ -57,12 +54,14 @@ const Login = props => {
             .then(res => {
                 console.log(res.data)
                 setState({
+                    ...state,
                     loading: false
                 })
-                props.history.push('/')
+                history.push('/')
             })
             .catch(err => {
                 setState({
+                    ...state,
                     loading: false,
                     errors: err.response.data
                 })
