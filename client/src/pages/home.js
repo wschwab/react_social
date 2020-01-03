@@ -52,7 +52,7 @@ const Home = () => {
              }, [])
     })
 
-    let recentPostsMarkup = state.posts ? (state.posts.map(post => <Post post={post}/>))
+    let recentPostsMarkup = state.posts ? (state.posts.map(post => <Post key={post.postId} post={post}/>))
          : <p>Loading...</p>
 
     return (

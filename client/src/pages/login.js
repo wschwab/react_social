@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import icon from '../images/icon.png'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 
 // Material UI
 import withStyles from '@material-ui/core/styles/withStyles'
@@ -9,6 +10,7 @@ import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
 import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 const styles = {
     form: {
@@ -24,7 +26,16 @@ const styles = {
         margin: '10px auto'
     },
     button: {
-        marginTop: 20
+        marginTop: 20,
+        position: 'relative'
+    },
+    customError: {
+        color: 'red',
+        fontSize: '0.8rem',
+        marginTop: 10
+    },
+    progress: {
+        position: 'absolute'
     }
 }
 
@@ -40,33 +51,62 @@ const Login = ({ classes, history }) => {
         setState({...state, [event.target.name]: event.target.value})
     }
 
-    const handleSubmit = event =>  {
-        event.preventDefault()
-        setState({
-            ...state,
-            loading: true
-        })
-        const userData = {
-            email: state.email,
-            password: state.password
+    useEffect(() => {
+        const handleSubmit = event => {
+            event.preventDefault()
+            setState({
+                ...state,
+                loading: true
+            })
+            const userData = {
+                email: state.email,
+                password: state.password
+            }
+            axios.post('/login', userData)
+                .then(res => {
+                    console.log(res.data)
+                    setState({
+                        ...state,
+                        loading: false
+                    })
+                    history.push('/')
+                })
+                .catch(err => {
+                    setState({
+                        ...state,
+                        loading: false,
+                        errors: err.response.data
+                    })
+                })
         }
-        axios.post('/login', userData)
-            .then(res => {
-                console.log(res.data)
-                setState({
-                    ...state,
-                    loading: false
-                })
-                history.push('/')
-            })
-            .catch(err => {
-                setState({
-                    ...state,
-                    loading: false,
-                    errors: err.response.data
-                })
-            })
-    }
+    }, [])
+    // const handleSubmit = event =>  {
+    //     event.preventDefault()
+    //     setState({
+    //         ...state,
+    //         loading: true
+    //     })
+    //     const userData = {
+    //         email: state.email,
+    //         password: state.password
+    //     }
+    //     axios.post('/login', userData)
+    //         .then(res => {
+    //             console.log(res.data)
+    //             setState({
+    //                 ...state,
+    //                 loading: false
+    //             })
+    //             history.push('/')
+    //         })
+    //         .catch(err => {
+    //             setState({
+    //                 ...state,
+    //                 loading: false,
+    //                 errors: err.response.data
+    //             })
+    //         })
+    // }
 
     return (
         <Grid container className={classes.form}>
@@ -76,7 +116,7 @@ const Login = ({ classes, history }) => {
                 <Typography variant="h2" className={classes.pageTitle}>
                     Login
                 </Typography>
-                <form noValidate onSubmit={handleSubmit}>
+                <form noValidate onSubmit={useEffect}>
                     <TextField id="email" name="email" type="email" label="Email"
                         className={classes.textField} value={state.email}
                         onChange={handleChange} helperText={state.errors.email}
@@ -85,8 +125,19 @@ const Login = ({ classes, history }) => {
                         className={classes.textField} value={state.password}
                         onChange={handleChange} helperText={state.errors.password}
                         error={state.errors.password ? true : false} fullWidth />
-                    <Button type="submit" variant="contained" color="primary" className={classes.button}>Login</Button>
-
+                    {state.errors.general && (
+                        <Typography variant="body2" className={classes.customError}>
+                            {state.errors.general}
+                        </Typography>
+                    )}
+                    <Button type="submit" variant="contained" color="primary" className={classes.button} disabled={state.loading}>
+                        Login
+                        {state.loading && (
+                            <CircularProgress size={30} className={classes.progress}/>
+                        )}
+                    </Button>
+                    <br />
+                    <small>Don't have an account?<Link to="/signup">Sign up!</Link></small>
                 </form>
             </Grid>
             <Grid item sm/>

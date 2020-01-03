@@ -32,10 +32,9 @@ exports.validateLoginData = data => {
     let errors = {};
 
     if(isEmpty(data.email)) errors.email = "Email field required";
-    if(!isEmail(data.email)) errors.email = "Invalid email";
     if(isEmpty(data.password)) errors.password = "Password field required";
 
-    if(Object.keys(errors).length > 0) return res.status(400).json(errors);
+//    if(Object.keys(errors).length > 0) return res.status(400).json(errors);
 
     return {
         errors,
