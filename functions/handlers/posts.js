@@ -9,7 +9,7 @@ exports.getAllPosts = (req, res) => {
             let posts = [];
             data.forEach(doc => {
                 posts.push({
-                    screamId: doc.id,
+                    postId: doc.id,
                     body: doc.data().body,
                     user: doc.data().user,
                     createdAt: doc.data().createdAt,

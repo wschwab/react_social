@@ -8,6 +8,7 @@ firebase.initializeApp(config);
 const { validateSignupData, validateLoginData, reduceUserDetails } = require('../util/validators');
 
 exports.signup = (req, res) => {
+    console.log(req);
     const newUser = {
         email: req.body.email,
         password: req.body.password,

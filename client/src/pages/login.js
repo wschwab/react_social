@@ -12,32 +12,9 @@ import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
 import CircularProgress from '@material-ui/core/CircularProgress'
 
-const styles = {
-    form: {
-        textAlign: 'center'
-    },
-    image: {
-        margin: '20px auto'
-    },
-    pageTitle: {
-        margin: '10px auto'
-    },
-    textField: {
-        margin: '10px auto'
-    },
-    button: {
-        marginTop: 20,
-        position: 'relative'
-    },
-    customError: {
-        color: 'red',
-        fontSize: '0.8rem',
-        marginTop: 10
-    },
-    progress: {
-        position: 'absolute'
-    }
-}
+const styles = theme => ({
+    ...theme.spreadComponents
+})
 
 const Login = ({ classes, history }) => {
     const [state, setState] = useState({
@@ -47,39 +24,37 @@ const Login = ({ classes, history }) => {
         errors: {}
     })
 
+    const [submitted, setSubmitted] = useState(false)
+    const [loading, setLoading] = useState(false)
+
     const handleChange = event => {
         setState({...state, [event.target.name]: event.target.value})
     }
 
     useEffect(() => {
-        const handleSubmit = event => {
-            event.preventDefault()
-            setState({
-                ...state,
-                loading: true
-            })
-            const userData = {
-                email: state.email,
-                password: state.password
-            }
-            axios.post('/login', userData)
-                .then(res => {
-                    console.log(res.data)
-                    setState({
-                        ...state,
-                        loading: false
-                    })
-                    history.push('/')
-                })
-                .catch(err => {
-                    setState({
-                        ...state,
-                        loading: false,
-                        errors: err.response.data
-                    })
-                })
+        setLoading(true)
+        const userData = {
+            email: state.email,
+            password: state.password
         }
-    }, [])
+        axios.post('/login', userData)
+            .then(res => {
+                console.log(res.data)
+                localStorage.setItem('FBIdToken', `Bearer ${res.data.token}`)
+                history.push('/')
+            })
+            .catch(err => {
+                console.error(err)
+                setState({
+                    ...state,
+                    errors: err.response.data
+                })
+                console.log(state)
+            })
+        setLoading(false)
+    }, [submitted])
+
+
     // const handleSubmit = event =>  {
     //     event.preventDefault()
     //     setState({
@@ -130,9 +105,9 @@ const Login = ({ classes, history }) => {
                             {state.errors.general}
                         </Typography>
                     )}
-                    <Button type="submit" variant="contained" color="primary" className={classes.button} disabled={state.loading}>
+                    <Button type="submit" variant="contained" color="primary" className={classes.button} disabled={state.loading} onClick={() => setSubmitted(true)}>
                         Login
-                        {state.loading && (
+                        {loading && (
                             <CircularProgress size={30} className={classes.progress}/>
                         )}
                     </Button>
